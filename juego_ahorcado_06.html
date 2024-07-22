@@ -11,7 +11,6 @@
 			}
 			h1
 			{
-				+
 				text-align:center;
 			}
 			#miCanvas
@@ -51,8 +50,7 @@
 			palabras_array.push("POSEIDON");
 			palabras_array.push("APOLO");
 			//
-			function Tecla(x, y, ancho, alto, letra)
-			{
+			function Tecla(x, y, ancho, alto, letra){
 				this.x = x;
 				this.y = y;
 				this.ancho = ancho;
@@ -60,8 +58,7 @@
 				this.letra = letra;	
 				this.dibuja = dibujaTecla;
 			}
-			function Letra(x, y, ancho, alto, letra)
-			{
+			function Letra(x, y, ancho, alto, letra){
 				this.x = x;
 				this.y = y;
 				this.ancho = ancho;
@@ -70,8 +67,7 @@
 				this.dibuja = dibujaCajaLetra;
 				this.dibujaLetra = dibujaLetraLetra;
 			}
-			function dibujaTecla()
-			{
+			function dibujaTecla(){
 				ctx.fillStyle = colorTecla;
 				ctx.strokeStyle = colorMargen;
 				ctx.fillRect(this.x, this.y, this.ancho, this.alto);
@@ -82,28 +78,28 @@
 				ctx.fillText(this.letra, this.x+this.ancho/2-5, this.y+this.alto/2+5);
 				
 			}
-			function dibujaLetraLetra()
-			{
-				
+			function dibujaLetraLetra(){
+				var w = this.ancho;
+				var h = this.alto;
+				ctx.fillStyle = "black";
+				ctx.font = "bold 40px Courier";
+				ctx.fillText(this.letra, this.x+w/2-12, this.y+h/2+14);
 			}
-			function dibujaCajaLetra()
-			{
+			function dibujaCajaLetra(){
 				ctx.fillStyle = "white";
 				ctx.strokeStyle = "black";
 				ctx.fillRect(this.x, this.y, this.ancho, this.alto);
 				ctx.strokeRect(this.x, this.y, this.ancho, this.alto);
 			}
 			/*** FUNCiONES **/
-			function teclado()
-			{
+			function teclado(){
 				var ren = 0;
 				var col = 0;
 				var letra = "";
 				var miLetra;
 				var x = inicioX;
 				var y = inicioY;
-				for(var i = 0; i < letras.length; i++)
-				{
+				for(var i = 0; i < letras.length; i++){
 					letra = letras.substr(i,1);
 					miLetra = new Tecla(x, y, lon, lon, letra);
 					miLetra.dibuja();
@@ -111,40 +107,72 @@
 					//
 					x += lon + margen;
 					col++;
-					if(col==10)
-					{
+					if(col==10){
 						col = 0;
 						ren++;
-						if(ren==2)
-						{
+						if(ren==2){
 							x = 280;
-						} 
-						else 
-						{
+						} else {
 							x = inicioX;
 						}
 					}
 					y = inicioY + ren * 50;
 				}
 			}
-			function pintaPalabra()
-			{
+			function pintaPalabra(){
 				var p = Math.floor(Math.random()*palabras_array.length);
 				palabra = 	palabras_array[p];
-				var w = canvas.width;
-				var len = palabra.length;
 				var ren = 0;
 				var col = 0;
 				var y = 230;
 				var lon = 50;
-				var x = (w - (lon+margen) *len)/2;
-				for(var i=0; i<palabra.length; i++)
-				{
+				var x = (canvas.width - (lon+margen) * palabra.length)/2;
+				for(var i=0; i<palabra.length; i++){
 					letra = palabra.substr(i,1);
 					miLetra = new Letra(x, y, lon, lon, letra);
 					miLetra.dibuja();
 					letras_array.push(miLetra);
 					x += lon + margen;
+				}
+			}
+			function cadalso(errores){
+				var imagen = new Image();
+				imagen.src = "imagenes/ahorcado/ahorcado"+errores+".png";
+				imagen.onload = function(){
+					ctx.drawImage(imagen,390,20,180,180);	
+				}
+			}
+			function ajusta(xx, yy){
+				var posCanvas = canvas.getBoundingClientRect();
+				var x = xx - posCanvas.left;
+				var y = yy - posCanvas.top;
+				return {x:x, y:y}
+				
+			}
+			function selecciona(e){
+				var pos = ajusta(e.clientX, e.clientY);	
+				var x = pos.x;
+				var y = pos.y;
+				var tecla;
+				var bandera = false;
+				for(var i=0; i<teclas_array.length; i++){
+					tecla = teclas_array[i];
+					if(tecla.x > 0){
+						if((x > tecla.x)&&(x < tecla.x + tecla.ancho)&&(y > tecla.y)&&(y< tecla.y + tecla.alto)){
+							break;	
+						}
+					}
+				}
+				if(i<teclas_array.length){
+					for(var i=0; i<palabra.length; i++){
+						letra = palabra.substr(i,1);
+						if(letra==tecla.letra){
+							caja = letras_array[i];
+							caja.dibujaLetra();
+							aciertos++;
+							bandera = true;
+						}
+					}
 				}
 			}
 			window.onload = function()
@@ -157,6 +185,8 @@
 					{
 						teclado();
 						pintaPalabra();
+						cadalso(errores);
+						canvas.addEventListener("click",selecciona,false);
 					} 
 					else 
 					{
@@ -166,6 +196,7 @@
 			}
 		</script>
 	</head>
+
 	<body>
 		<h1>Ahorcado CANVAS</h1>
 		<canvas id="miCanvas" width="960px" height="450px">
